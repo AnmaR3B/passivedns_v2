@@ -91,10 +91,10 @@ void cxt_init();
 int connection_tracking(packetinfo *pi);
 connection *cxt_new(packetinfo *pi);
 void del_connection(connection *, connection **);
-void print_pdns_stats();
+void print_pdns_stats(int sig);
 void free_config();
 void reopen_log_files();
-void game_over ();
+void game_over(int sig);
 void got_packet(u_char *useless, const struct pcap_pkthdr *pheader,
                 const u_char *packet);
 #ifdef HAVE_PFRING
@@ -776,7 +776,7 @@ void check_interrupt()
 {
     dlog("[D] In interrupt. Flag: %d\n",config.intr_flag);
     if (ISSET_INTERRUPT_END(config))
-        game_over();
+        game_over(0);
 
     else if (ISSET_INTERRUPT_SESSION(config))
         set_end_sessions();
@@ -788,8 +788,8 @@ void check_interrupt()
         config.intr_flag = 0;
 }
 
-void sig_alarm_handler()
-{
+void sig_alarm_handler(int sig)
+{   (void)sig;
     time_t now_t;
     now_t = config.tstamp.tv_sec;
 
@@ -804,8 +804,8 @@ void sig_alarm_handler()
     alarm(TIMEOUT);
 }
 
-void sig_hup_handler()
-{
+void sig_hup_handler(int sig)
+{	(void)sig;
     signal_reopen_log_files = 1;
 }
 
@@ -835,7 +835,7 @@ void set_end_dns_records()
     config.intr_flag |= INTERRUPT_DNS;
 
     if (config.inpacket == 0) {
-        expire_dns_records();
+        expire_dns_records(0);
         config.dnslastchk = config.tstamp.tv_sec;
         config.intr_flag &= ~INTERRUPT_DNS;
     }
@@ -1039,11 +1039,11 @@ int daemonize()
     return SUCCESS;
 }
 
-void game_over()
-{
+void game_over(int sig)
+{	(void)sig;
     if (config.inpacket == 0) {
-        expire_all_dns_records();
-        print_pdns_stats();
+        expire_all_dns_records(0);
+        print_pdns_stats(0);
 
         if (config.handle != NULL)
             pcap_close(config.handle);
@@ -1081,8 +1081,8 @@ void free_config()
         free(config.cfilter.bf_insns);
 }
 
-void print_pdns_stats()
-{
+void print_pdns_stats(int sig)
+{	(void)sig;
     FILE *handle = stdout;
     if (config.use_stats_file) {
         handle = fopen(config.statsfile, "w");
@@ -1505,7 +1505,7 @@ int main(int argc, char *argv[])
 
         pfring_loop(config.pfhandle, pfring_got_packet, (u_char*)NULL, 1);
 
-        game_over();
+        game_over(0);
         return 0;
     }
 #endif /* HAVE_PFRING */
@@ -1572,7 +1572,7 @@ int main(int argc, char *argv[])
     }
 
     if (config.handle == NULL) {
-       game_over();
+       game_over(0);
        return 1;
     }
 
@@ -1597,7 +1597,6 @@ int main(int argc, char *argv[])
 
     pcap_loop(config.handle, -1, got_packet, NULL);
 
-    game_over();
+    game_over(0);
     return 0;
 }
-

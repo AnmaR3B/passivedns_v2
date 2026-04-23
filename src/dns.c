@@ -1279,7 +1279,7 @@ pdns_record *get_pdns_record(uint64_t dnshash, packetinfo *pi,
     return pdnsr;
 }
 
-void expire_dns_records()
+void expire_dns_records(int sig)
 {
     pdns_record *pdnsr;
     uint8_t run = 0;
@@ -1352,7 +1352,7 @@ void update_config_mem_counters()
     dlog("------------------------------------------------\n");
 }
 
-void expire_all_dns_records()
+void expire_all_dns_records(int sig)
 {
     pdns_record *pdnsr;
 
