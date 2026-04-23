@@ -87,6 +87,16 @@ Questions, suggestions, sugar or flame is always welcome :)
 
 I hope PassiveDNS gives you a new tool to fight malware and its herders...
 
+==================================================
+ make clean                                                        
+./configure
+make
+sudo make install
+
+
+
+====================================================
+
 (c)2011-2020  -  Edward Bjarte Fjellskål
 Maintained/Updated by AnmaR (2026)
 Acknowledgements: Mohammed Baqer
